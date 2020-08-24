@@ -77,7 +77,8 @@ jobs:
     
     - bash: |
         # Install dependencies
-        python -m pip install --upgrade pip && python -m pip install azureml-opendatasets==${{parameters.sdkVersion}}
+        dependencies="azureml-opendatasets==${{parameters.sdkVersion}} pandas"
+        python -m pip install --upgrade pip && python -m pip install $dependencies --use-feature=2020-resolver
         # Download sample files
         datapath=$(python Custom_Script/mlops-pipelines/scripts/download_data.py --maxfiles ${{parameters.maxFiles}})
         echo "##vso[task.setvariable variable=datapath;isOutput=true;]$datapath"

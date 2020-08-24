@@ -3,6 +3,7 @@
 
 import os
 import argparse
+import pandas as pd
 from azureml.opendatasets import OjSalesSimulated
 
 
@@ -16,11 +17,18 @@ def main(target_path, maxfiles=None):
         oj_sales_files = oj_sales_files.take(maxfiles)
 
     # Create a folder to download
-    if not os.path.exists(target_path):
-        os.mkdir(target_path)
+    os.makedirs(target_path, exist_ok=True)
 
     # Download the data
-    oj_sales_files.download(target_path, overwrite=True)
+    file_paths = oj_sales_files.download(target_path, overwrite=True)
+
+    # Add extra group columns to data
+    for fpath in file_paths:
+        dataset = pd.read_csv(fpath, dtype={'Store': 'str'})
+        dataset['StoreGroup10'] = dataset.Store.str[:-1] + 'X'
+        dataset['StoreGroup100'] = dataset.Store.str[:-2] + 'XX'
+        dataset['StoreGroup1000'] = dataset.Store.str[:-3] + 'XXX'
+        dataset.to_csv(fpath, index=False)
 
     return target_path
 
